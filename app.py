@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 # LangChain Imports
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -21,8 +22,10 @@ if not GEMINI_API_KEY:
     raise RuntimeError("❌ GEMINI_API_KEY not found. Check your .env file.")
 
 print(f"✅ GEMINI_API_KEY loaded: {GEMINI_API_KEY[:8]}...")
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 app = FastAPI(title="Gemini Memory API")
+
 
 # ── CORS ────────────────────────────────────────────────────────
 app.add_middleware(
@@ -32,21 +35,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 # ── Serve frontend files ─────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def serve_frontend():
-    return FileResponse(os.path.join(BASE_DIR, "index.html"))
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
-@app.get("/style.css")
-async def serve_css():
-    return FileResponse(os.path.join(BASE_DIR, "style.css"))
-
-@app.get("/app.js")
-async def serve_js():
-    return FileResponse(os.path.join(BASE_DIR, "app.js"))
 
 # ── LangChain Setup ──────────────────────────────────────────────
 model = ChatGoogleGenerativeAI(
