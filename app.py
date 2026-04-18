@@ -100,7 +100,9 @@ async def chat_endpoint(request: ChatRequest):
     except Exception as e:
         traceback.print_exc()  # shows full error in your terminal
         raise HTTPException(status_code=500, detail=str(e))
-
+@app.get("/ping")
+def ping():
+    return {"status": "awake"}
 @app.get("/sessions")
 async def list_sessions():
     return {"sessions": list(store.keys())}
