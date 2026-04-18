@@ -25,6 +25,10 @@ A high-performance, full-stack AI assistant powered by **Gemini 2.5 Flash** and 
 * **Frontend:** HTML5, CSS3, JavaScript (Fetch API)
 
 ---
+## 🌐 Live Demo
+You can try out the live version of **Aeon-AI** here:
+🚀 **[Launch Live App](https://aeon-ai.onrender.com)**
+
 
 ## ⚙️ Installation & Setup
 
@@ -32,8 +36,5 @@ A high-performance, full-stack AI assistant powered by **Gemini 2.5 Flash** and 
 ```bash
 git clone [https://github.com/mohdanaslko/Aeon-AI.git](https://github.com/mohdanaslko/Aeon-AI.git)
 cd Aeon-AI
-## 🌐 Live Demo
-You can try out the live version of **Aeon-AI** here:
-🚀 **[Launch Live App](https://aeon-ai.onrender.com)**
 
 ---
