@@ -1,5 +1,5 @@
 # 🌌 Aeon-AI
-A high-performance, full-stack AI assistant powered by **Gemini 1.5 Flash** and **LangChain**. Featuring a custom-built interactive UI and a **FastAPI** backend with persistent session-based memory.
+A high-performance, full-stack AI assistant powered by **Gemini 2.5 Flash** and **LangChain**. Featuring a custom-built interactive UI and a **FastAPI** backend with persistent session-based memory.
 
 <p align="center">
   <img src="image/banner.jpeg" alt="Aeon-AI Banner" width="100%">
@@ -19,7 +19,7 @@ A high-performance, full-stack AI assistant powered by **Gemini 1.5 Flash** and 
 ---
 
 ## 🛠 Tech Stack
-* **LLM:** [Google Gemini 1.5 Flash](https://ai.google.dev/gemini-api/docs)
+* **LLM:** [Google Gemini 2.5 Flash](https://ai.google.dev/gemini-api/docs)
 * **Orchestration:** [LangChain](https://www.langchain.com/) (LCEL & RunnableWithMessageHistory)
 * **Backend:** [FastAPI](https://fastapi.tiangolo.com/) (Python 3.10+)
 * **Frontend:** HTML5, CSS3, JavaScript (Fetch API)
