@@ -107,7 +107,4 @@ def ping():
 async def list_sessions():
     return {"sessions": list(store.keys())}
 
-# ── Run ──────────────────────────────────────────────────────────
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
