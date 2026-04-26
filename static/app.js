@@ -270,7 +270,7 @@ async function sendMessage(text) {
   messagesEnd.scrollIntoView({ behavior: "smooth" });
 
   try {
-    const res = await fetch("http://localhost:8000/chat", {
+    const res = await fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user_id: state.activeId, message: msgText }),

@@ -6,8 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from fastapi.staticfiles import StaticFiles
 import uvicorn
+
 # LangChain Imports
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -17,17 +17,25 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# ── Startup check — catch missing API key immediately ───────────
+# ── Startup check ────────────────────────────────────────────────
 if not GEMINI_API_KEY:
-    raise RuntimeError("❌ GEMINI_API_KEY not found. Check your .env file.")
+    raise RuntimeError("❌ GEMINI_API_KEY not found. Add it in Render → Environment.")
 
 print(f"✅ GEMINI_API_KEY loaded: {GEMINI_API_KEY[:8]}...")
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+# ── Guard: static folder must exist ─────────────────────────────
+if not os.path.isdir(STATIC_DIR):
+    raise RuntimeError(
+        f"❌ Static directory not found: {STATIC_DIR}\n"
+        "Put index.html, style.css, and app.js inside a /static folder."
+    )
+
 app = FastAPI(title="Gemini Memory API")
 
-
-# ── CORS ────────────────────────────────────────────────────────
+# ── CORS ─────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,16 +43,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-# ── Serve frontend files ─────────────────────────────────────────
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# ── Static files ─────────────────────────────────────────────────
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# ── Frontend ──────────────────────────────────────────────────────
 @app.api_route("/", methods=["GET", "HEAD"])
 async def serve_frontend():
     return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
-
-# ── LangChain Setup ──────────────────────────────────────────────
+# ── LangChain ─────────────────────────────────────────────────────
 model = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     temperature=0.7,
@@ -60,8 +68,7 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 
 chain = prompt | model
-
-store = {}
+store: dict = {}
 
 def get_session_history(session_id: str):
     if session_id not in store:
@@ -75,14 +82,12 @@ with_message_history = RunnableWithMessageHistory(
     history_messages_key="chat_history",
 )
 
-# ── Request Model ────────────────────────────────────────────────
-
+# ── Request Model ─────────────────────────────────────────────────
 class ChatRequest(BaseModel):
     user_id: str
     message: str
 
-# ── Endpoints ────────────────────────────────────────────────────
-
+# ── Endpoints ─────────────────────────────────────────────────────
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     try:
@@ -93,18 +98,21 @@ async def chat_endpoint(request: ChatRequest):
             config=config
         )
         print(f"🤖 Response OK — {len(response.content)} chars")
-        return {
-            "user_id": request.user_id,
-            "response": response.content
-        }
+        return {"user_id": request.user_id, "response": response.content}
     except Exception as e:
-        traceback.print_exc()  # shows full error in your terminal
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/ping")
 def ping():
     return {"status": "awake"}
+
 @app.get("/sessions")
 async def list_sessions():
     return {"sessions": list(store.keys())}
 
-
+# ── Entry point ───────────────────────────────────────────────────
+# Render injects PORT; fall back to 8000 locally.
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
